@@ -18,8 +18,8 @@ pipeline {
                 echo 'Installing dependencies...'
                 sh '''
                 python3 -m venv venv
-                source venv/bin/activate
-                pip install Flask
+                . venv/bin/activate  # Replaced 'source' with '.'
+                pip install Flask pytest
                 '''
             }
         }
@@ -28,8 +28,8 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh '''
-                source venv/bin/activate
-                pytest || exit 0
+                . venv/bin/activate
+                pytest || true
                 '''
             }
         }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 echo 'Deploying the Flask application...'
                 sh '''
-                source venv/bin/activate
+                . venv/bin/activate
                 nohup python3 app.py &
                 '''
             }
@@ -52,12 +52,12 @@ pipeline {
         success {
             mail to: "${EMAIL_RECIPIENT}",
                  subject: "✅ Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Good news! Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} was successful."
+                 body: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} was successful."
         }
         failure {
             mail to: "${EMAIL_RECIPIENT}",
                  subject: "❌ Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} failed. Please check Jenkins for details."
+                 body: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} failed. Check Jenkins for logs."
         }
     }
 }

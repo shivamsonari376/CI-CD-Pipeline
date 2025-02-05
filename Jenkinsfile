@@ -17,9 +17,10 @@ pipeline {
             steps {
                 echo 'Installing dependencies...'
                 sh '''
-                python3 -m venv venv
-                . venv/bin/activate  # Replaced 'source' with '.'
-                pip install Flask pytest
+                python3 -m venv venv1
+                . venv1/bin/activate  # Activate the virtual environment
+                pip install --upgrade pip --break-system-packages
+                pip install Flask pytest --break-system-packages
                 '''
             }
         }
@@ -28,7 +29,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh '''
-                . venv/bin/activate
+                . venv1/bin/activate
                 pytest || true
                 '''
             }
@@ -41,7 +42,7 @@ pipeline {
             steps {
                 echo 'Deploying the Flask application...'
                 sh '''
-                . venv/bin/activate
+                . venv1/bin/activate
                 nohup python3 app.py &
                 '''
             }
@@ -58,6 +59,13 @@ pipeline {
             mail to: "${EMAIL_RECIPIENT}",
                  subject: "❌ Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} failed. Check Jenkins for logs."
+        }
+        always {
+            echo 'Cleaning up the virtual environment...'
+            sh '''
+            deactivate || true
+            rm -rf venv1
+            '''
         }
     }
 }

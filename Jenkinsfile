@@ -43,7 +43,7 @@ pipeline {
                 echo 'Deploying the Flask application...'
                 sh '''
                 . venv1/bin/activate
-                nohup python3 app.py &
+                nohup python3 app.py > app.log 2>&1 &
                 '''
             }
         }
@@ -59,13 +59,6 @@ pipeline {
             mail to: "${EMAIL_RECIPIENT}",
                  subject: "❌ Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} failed. Check Jenkins for logs."
-        }
-        always {
-            echo 'Cleaning up the virtual environment...'
-            sh '''
-            deactivate || true
-            rm -rf venv1
-            '''
         }
     }
 }

@@ -18,7 +18,7 @@ pipeline {
                 echo 'Installing dependencies...'
                 sh '''
                 python3 -m venv venv1
-                . venv1/bin/activate  # Activate the virtual environment
+                . venv1/bin/activate
                 pip install --upgrade pip --break-system-packages
                 pip install Flask pytest --break-system-packages
                 '''
@@ -44,6 +44,7 @@ pipeline {
                 sh '''
                 . venv1/bin/activate
                 nohup python3 app.py > app.log 2>&1 &
+                echo $! > flaskapp.pid  # Store the process ID for later management
                 '''
             }
         }

@@ -44,7 +44,9 @@ pipeline {
                 sh '''
                 . venv1/bin/activate
                 nohup python3 app.py > app.log 2>&1 &
-                echo $! > flaskapp.pid  # Store the process ID for later management
+                echo $! > flaskapp.pid  # Save process ID for management
+                sleep 5  # Allow time for Flask to initialize
+                ps -ef | grep app.py  # Check if the Flask app is running
                 '''
             }
         }
